@@ -1,0 +1,14 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    padding: 12px 24px;
+    background-color: #f2f2f2;
+    color:#333;
+}
+
+.title {
+    font-weight: bold;
+}
