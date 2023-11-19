@@ -1,7 +1,7 @@
-import React, {useState} from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
-const SignIn = () => {
+const SignUp = () => {
   const [formData, setFormData] = useState({});
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +20,7 @@ const SignIn = () => {
     e.preventDefault();
     setIsLoading(true);
     setError('')
-    const res = await fetch(API_URL + '/api/auth/signin', {
+    const res = await fetch(API_URL + '/api/auth/signup', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -35,7 +35,7 @@ const SignIn = () => {
       setIsLoading(false);
       return;
     } else {
-      navigator('/home');
+      navigator('/signin');
     }
   }
 
@@ -43,6 +43,10 @@ const SignIn = () => {
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl text-center font-semibold my-8'>Sign Up</h1>
       <form className='flex flex-col gap-4' onSubmit={handleSubmit}>
+        <input type="text" placeholder='Username' id='username'
+          className='border rounded-lg p-3 max-w-lg'
+          onChange={handleInputChange}
+        />
         <input type="email" placeholder='Email' id='email'
           className='border rounded-lg p-3 max-w-lg'
           onChange={handleInputChange}
@@ -54,9 +58,9 @@ const SignIn = () => {
         <button
           type='submit'
           disabled={isLoading}
-          className='bg-blue-600 text-white p-3 rounded-lg uppercase hover:opcaity-95 disabled:opacity-80 cursor-pointer flex justify-center items-center gap-2'
+          className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opcaity-95 disabled:opacity-80 cursor-pointer flex justify-center items-center gap-2'
         >
-          Sign In
+          Sign Up
           {isLoading && <svg height={16} width={16} viewBox='0 0 1024 1024' className='animate-spin'>
             <path d="M876.864 782.592c3.264 0 6.272-3.2 6.272-6.656 0-3.456-3.008-6.592-6.272-6.592-3.264 0-6.272 3.2-6.272 6.592 0 
             3.456 3.008 6.656 6.272 6.656z m-140.544 153.344c2.304 2.432 5.568 3.84 8.768 3.84a12.16 12.16 0 0 0 8.832-3.84 13.76 
@@ -89,11 +93,11 @@ const SignIn = () => {
         <p className='text-red-500'>{error}</p>
       </div>
       <div className='flex gap-2 mt-5'>
-        <p>Have not an account?</p>
-        <Link to='/signin' className='text-blue-600'>Sign Up</Link>
+        <p>Have an account?</p>
+        <Link to='/signin' className='text-blue-600'>Sign in</Link>
       </div>
     </div>
   )
 }
 
-export default SignIn
+export default SignUp
