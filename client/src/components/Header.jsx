@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaUser } from 'react-icons/fa';
+import { useDispatch, useSelector } from 'react-redux';
 
 const Header = () => {
-  
+  const { currentUser } = useSelector(state => state.user)
+
   return (
     <header className='bg-slate-200 shadow-md'>
       <div className='flex justify-between items-center max-w-6xl mx-auto p-3'>
@@ -22,18 +24,24 @@ const Header = () => {
           />
           <FaSearch className='text-slate-600' />
         </form>
-        <ul className='flex gap-4'>
+        <ul className='flex gap-4 justify-center items-center'>
           <Link to='/home'>
-            <li className='hidden sm:inline text-slate-700 hover:underline cursor-pointer'>Home</li>
+            <li className='hidden sm:inline text-slate-700 hover:underline'>Home</li>
           </Link>
           <Link to='/about'>
-            <li className='hidden sm:inline text-slate-700 hover:underline cursor-pointer'>About</li>
+            <li className='hidden sm:inline text-slate-700 hover:underline'>About</li>
           </Link>
-          <Link to='/signin'>
-            <li className='text-slate-700 hover:underline cursor-pointer'>Sign In</li>
+          <Link to='/profile'>
+            {currentUser
+              ? (
+                <div className='h-10 w-10 rounded-full bg-slate-500 flex justify-center items-center shadow-md shadow-slate-400'>
+                  <FaUser color='#f3f3f3' size={24} />
+                </div>
+              )
+              : (
+                <li className='text-slate-700 hover:underline'>Sign In</li>
+              )}
           </Link>
-
-
 
         </ul>
       </div>

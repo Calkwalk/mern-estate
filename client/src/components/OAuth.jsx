@@ -1,72 +1,30 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
 
-import { signInStart, signInSuccess, signInFailure } from '../redux/user/userSlice';
-import OAuth from '../components/OAuth';
+const OAuth = () => {
+    const [loading, setLoading] = useState(false);
 
-const SignIn = () => {
-  const [formData, setFormData] = useState({});
-  const { error, loading } = useSelector((state) => state.user)
-
-  const navigator = useNavigate();
-  const dispatch = useDispatch();
-
-  const API_URL = import.meta.env.VITE_REACT_APP_BASE_API_URL
-
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value
-    })
-  }
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    dispatch(signInStart())
-
-    const res = await fetch(API_URL + '/api/auth/signin', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include', // credentials: 'include' (for axios)
-      body: JSON.stringify(formData)
-    });
-
-    const userDate = await res.json();
-
-    console.log(userDate)
-
-    if (!userDate.success) {
-      dispatch(signInFailure(userDate.message))
-      return;
-    } else {
-      dispatch(signInSuccess(userDate.data))
-      navigator('/');
+    const handleGoogleClick = async () => {
+        setLoading(true);
+        try {
+            setTimeout(() => {
+                setLoading(false)
+            }, 2000);
+        } catch (error) {
+            setLoading(false)
+            console.log('Could nt sign in with google.', error)
+        }
     }
-  }
 
-  return (
-    <div className='p-3 max-w-lg mx-auto'>
-      <h1 className='text-3xl text-center font-semibold my-8'>Sign In</h1>
-      <form id='sigin-form' className='flex flex-col gap-4' onSubmit={handleSubmit}>
-        <input type="email" placeholder='Email' id='email' autoComplete='email'
-          className='border rounded-lg p-3 max-w-lg'
-          onChange={handleInputChange}
-        />
-        <input type="password" placeholder='Password' id='password'
-          className='border rounded-lg p-3 max-w-lg'
-          onChange={handleInputChange}
-        />
+    return (
         <button
-          type='submit'
-          disabled={loading}
-          className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opcaity-95 disabled:opacity-80 cursor-pointer flex justify-center items-center gap-2'
+            type='button'
+            onClick={handleGoogleClick}
+            disabled={loading}
+            className='bg-red-600 text-white p-3 rounded-lg uppercase hover:opcaity-95 disabled:opacity-80 cursor-pointer flex justify-center items-center gap-2'
         >
-          Sign In
-          {loading && <svg height={16} width={16} viewBox='0 0 1024 1024' className='animate-spin'>
-            <path d="M876.864 782.592c3.264 0 6.272-3.2 6.272-6.656 0-3.456-3.008-6.592-6.272-6.592-3.264 0-6.272 3.2-6.272 6.592 0 
+            Continue With Google
+            {loading && <svg height={16} width={16} viewBox='0 0 1024 1024' className='animate-spin'>
+                <path d="M876.864 782.592c3.264 0 6.272-3.2 6.272-6.656 0-3.456-3.008-6.592-6.272-6.592-3.264 0-6.272 3.2-6.272 6.592 0 
             3.456 3.008 6.656 6.272 6.656z m-140.544 153.344c2.304 2.432 5.568 3.84 8.768 3.84a12.16 12.16 0 0 0 8.832-3.84 13.76 
             13.76 0 0 0 0-18.56 12.224 12.224 0 0 0-8.832-3.84 12.16 12.16 0 0 0-8.768 3.84 13.696 13.696 0 0 0 0 18.56zM552.32 
             1018.24c3.456 3.648 8.32 5.76 13.184 5.76a18.368 18.368 0 0 0 13.184-5.76 20.608 20.608 0 0 0 0-27.968 18.368 18.368 
@@ -89,22 +47,10 @@ const SignIn = () => {
             0 42.24-9.216 57.152-25.088a89.344 89.344 0 0 0 0-121.088 79.616 79.616 0 0 0-57.152-25.088c-21.184 0-42.24 9.216-57.216 
             25.088a89.344 89.344 0 0 0 0 121.088z m50.432 204.032c16.128 17.088 38.784 27.008 61.632 27.008 22.784 0 45.44-9.92 
             61.568-27.008a96.256 96.256 0 0 0 0-130.432 85.76 85.76 0 0 0-61.568-27.072c-22.848 0-45.44 9.984-61.632 27.072a96.192 96.192 0 0 0 0 130.432z"
-              fill="#ffffff"></path>
-          </svg>}
+                    fill="#ffffff"></path>
+            </svg>}
         </button>
-
-        <OAuth />
-        
-      </form>
-      <div>
-        <p className='text-red-500'>{error}</p>
-      </div>
-      <div className='flex gap-2 mt-5'>
-        <p>Dont have an account?</p>
-        <Link to='/signin' className='text-blue-600'>Sign Up</Link>
-      </div>
-    </div>
-  )
+    )
 }
 
-export default SignIn
+export default OAuth
