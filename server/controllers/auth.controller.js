@@ -35,8 +35,9 @@ export const signin = async (req, res, next) => {
                 { id: email },
                 process.env.JWT_SECRET || 'FtAfnEnoLaXXQrYO'
             )
+
             // res.cookie('access_token', token, { httpOnly: true, expires: new Date(Datae.now() + 24 * 60 * 60 * 1000) })
-            res.cookie('access_token', token, { httpOnly: true }).status(200).json({
+            res.cookie('access_token', token, { httpOnly: false }).status(200).json({
                 success: true,
                 message: 'user has been authed.',
                 data: { username: validUser.username, email: validUser.email, token }

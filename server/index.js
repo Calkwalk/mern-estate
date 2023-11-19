@@ -23,8 +23,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
-app.use(morgan("command"));
-app.use(cors());
+app.use(morgan("tiny"));
+app.use(cors({ 
+    origin: ['http://localhost:5173'],
+    credentials: true
+ }));
 
 /* ROUTES */
 const __filename = fileURLToPath(import.meta.url);
@@ -46,6 +49,9 @@ app.use((err, req, res, next) => {
         message
     });
 });
+
+
+
 
 // 404
 app.post('*', (req, res) => res.status(404).json({ message: 'URL Not Found(404).' }));
@@ -74,7 +80,7 @@ const HOST = process.env.SERVER_URL || 'http://localhost'
 // });
 
 
-db.getConnection((error,connection) => {
+db.getConnection((error, connection) => {
     if (error) {
         console.log('Database Connect Error:', error)
     } else {
