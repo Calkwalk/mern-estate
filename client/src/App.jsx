@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import {Home, About, Profile, SignIn, SignOut, SignUp} from './pages';
+import {Home, About, Profile, SignIn, SignOut, SignUp, CreateList} from './pages';
 import Header from './components/Header';
 import PrivateRoute from './components/PrivateRoute';
 function App() {
@@ -14,7 +14,8 @@ function App() {
         <Route path='/signout'  element={ <SignOut />   } />
         <Route path='/signup'   element={ <SignUp />    } />
         <Route element={<PrivateRoute />}>
-          <Route path='/profile' element={ <Profile />  } />
+          <Route path='/profile'      element={ <Profile />    } />
+          <Route path='/createlist'   element={ <CreateList /> } />
         </Route>
       </Routes>
     </Router>

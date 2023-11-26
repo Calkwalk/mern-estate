@@ -1,7 +1,8 @@
 import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
-import mongoose from 'mongoose';
+import cookieParser from "cookie-parser";
+// import mongoose from 'mongoose';
 import cors from "cors";
 import * as dotenv from "dotenv";
 
@@ -11,6 +12,8 @@ import { fileURLToPath } from "node:url"
 
 import userRouter from './routes/user.route.js';
 import authRouter from './routes/auth.route.js';
+import fileRouter from './routes/file.route.js';
+import listRouter from './routes/list.route.js';
 
 import db from './mysql/dbhelper.js';
 
@@ -24,10 +27,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("tiny"));
-app.use(cors({ 
+app.use(cookieParser());
+app.use(cors({
     origin: ['http://localhost:5173'],
     credentials: true
- }));
+}));
 
 /* ROUTES */
 const __filename = fileURLToPath(import.meta.url);
@@ -38,6 +42,8 @@ app.post("/", (req, res) => res.status(200).json({ message: 'Calkwalk Estate API
 
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/file", fileRouter);
+app.use("/api/listing", listRouter);
 
 // Middleware for error handler
 app.use((err, req, res, next) => {

@@ -2,9 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaSearch, FaUser } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
-
+import { useCookies } from 'react-cookie';
+// import { getCookie, setCookie, deleteCookie } from '../utils/cookie';
 const Header = () => {
   const { currentUser } = useSelector(state => state.user)
+  const [ cookies, setCookie, removeCookie] = useCookies('http://localhost:5173');
 
   return (
     <header className='bg-slate-200 shadow-md'>
@@ -25,18 +27,26 @@ const Header = () => {
           <FaSearch className='text-slate-600' />
         </form>
         <ul className='flex gap-4 justify-center items-center'>
-          <Link to='/home'>
+          <Link to='/'>
             <li className='hidden sm:inline text-slate-700 hover:underline'>Home</li>
           </Link>
           <Link to='/about'>
             <li className='hidden sm:inline text-slate-700 hover:underline'>About</li>
           </Link>
           <Link to='/profile'>
-            {currentUser
+            {currentUser && cookies['access_token']
               ? (
-                <div className='h-10 w-10 rounded-full bg-slate-500 flex justify-center items-center shadow-md shadow-slate-400'>
-                  <FaUser color='#f3f3f3' size={24} />
+                <div className='flex flex-row items-end justify-center gap-2'>
+                  <div className='h-10 w-10 rounded-full bg-slate-500 flex justify-center items-center shadow-md shadow-slate-400'>
+                    <FaUser color='#f3f3f3' size={24} />
+                  </div>
+                  <div>
+                    <p className='text-xs text-gray-500 font-semibold'>{currentUser.username}</p>
+                    <p className='text-xs text-gray-500'>{currentUser.email}</p>
+                  </div>
+
                 </div>
+
               )
               : (
                 <li className='text-slate-700 hover:underline'>Sign In</li>

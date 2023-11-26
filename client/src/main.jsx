@@ -7,14 +7,19 @@ import { persistor, store } from './redux/store.js';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/lib/integration/react';
 
+import { CookiesProvider } from 'react-cookie';
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <App />
+        <CookiesProvider defaultSetOptions={{ path: '/' }}>
+          <App />
+        </CookiesProvider>
+
       </PersistGate>
-      
+
     </Provider>
-    
+
   </React.StrictMode>,
 )

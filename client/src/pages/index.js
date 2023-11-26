@@ -4,6 +4,7 @@ import Profile  from './Profile';
 import SignIn   from './SignIn';
 import SignOut  from './SignOut';
 import SignUp   from './SignUp';
+import CreateList from './CreateList';
 
 export {
     Home,
@@ -11,5 +12,6 @@ export {
     Profile,
     SignIn,
     SignOut,
-    SignUp
+    SignUp,
+    CreateList
 };

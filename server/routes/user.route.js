@@ -1,17 +1,12 @@
 import express from 'express';
+import { verifyToken } from '../utils/verifyUser.js';
+import { updateUser, deleteUser, getUserListing } from '../controllers/user.controller.js';
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
-    res.json({
-        message: 'api/userRouter'
-    })
-});
+router.post('/update/:id', verifyToken, updateUser);
+router.delete('/delete/:id', verifyToken, deleteUser);
 
-router.get('/test', (req, res) => {
-    res.json({
-        message: 'test ok'
-    })
-});
+router.get('/listing/:id', getUserListing)
 
 export default router;

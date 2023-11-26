@@ -27,10 +27,8 @@ const SignIn = () => {
 
     const res = await fetch(API_URL + '/api/auth/signin', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include', // credentials: 'include' (for axios)
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(formData)
     });
 
@@ -94,14 +92,14 @@ const SignIn = () => {
         </button>
 
         <OAuth />
-        
+
       </form>
-      <div>
-        <p className='text-red-500'>{error}</p>
+      <div className='mt-1'>
+        <p className='text-red-500 text-sm'>{error}</p>
       </div>
       <div className='flex gap-2 mt-5'>
         <p>Dont have an account?</p>
-        <Link to='/signin' className='text-blue-600'>Sign Up</Link>
+        <Link to='/signup' className='text-blue-600'>Sign Up</Link>
       </div>
     </div>
   )

@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* @layer base {
+
+    button,
+    [type='button'],
+    [type='reset'],
+    [type='submit'] {
+        background-color: #3b82f6;
+    }
+} */
+
 body {
     background-color: "#f1f5f1";
+}
+
+.ant-btn-primary {
+    @apply bg-[#1677ff]
 }
