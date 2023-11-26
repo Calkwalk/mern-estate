@@ -31,7 +31,8 @@ const ListItem = ({ listingItem, setUserListings }) => {
             if (result.success) {
                 setUserListings(prev => prev.filter(item => item.id != listingItem.id));
             }
-        })
+        });
+        setIsShowModal(false);
     };
 
     const handleEditListing = () => {
@@ -53,9 +54,10 @@ const ListItem = ({ listingItem, setUserListings }) => {
             </Link>
             <div className='flex flex-row gap-2'>
 
-                <button type='button' onClick={handleEditListing}
-                    className='bg-green-400 text-white text-xs p-2 w-16 rounded-md hover:opacity-75'>Edit</button>
-
+                <Link to={`/updatelist/${listingItem.id}`}>
+                    <button type='button' onClick={handleEditListing}
+                        className='bg-green-400 text-white text-xs p-2 w-16 rounded-md hover:opacity-75'>Edit</button>
+                </Link>
                 <button onClick={() => setIsShowModal(true)}
                     className='bg-red-500 text-white text-xs p-2 w-16 rounded-md  hover:opacity-75'>Delete</button>
             </div>

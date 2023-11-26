@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -31,6 +31,30 @@ const Profile = () => {
   const imageInputRef = useRef()
 
   const API_URL = import.meta.env.VITE_REACT_APP_BASE_API_URL
+
+  useEffect(() => {
+    const fetchUserListings = () => {
+      //set query status
+
+      fetch(API_URL + '/api/user/listing/' + currentUser.id)
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.success) {
+            setUserListings(result.data)
+          } else {
+            console.error('get userlist failed')
+          }
+        })
+        .catch((e) => {
+          console.log(e)
+        })
+        .finally(() => {
+          //Todo: reset status
+        });
+    };
+
+    fetchUserListings()
+  }, [])
 
   const handleInputChange = (e) => {
     setFormData({
@@ -124,66 +148,47 @@ const Profile = () => {
     navigate('/createlist')
   }
 
-  const handleGetUserList = () => {
-    //set query status
-
-    fetch(API_URL + '/api/user/listing/' + currentUser.id)
-      .then((res) => res.json())
-      .then((result) => {
-        if (result.success) {
-          setUserListings(result.data)
-        } else {
-          console.error('get userlist failed')
-        }
-      })
-      .catch((e) => {
-        console.log(e)
-      })
-      .finally(() => {
-        //Todo: reset status
-      });
-  }
-
   return (
-    <div className='p-3 max-w-lg mx-auto'>
-      <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
-      <form id='profile-form' className='flex flex-col gap-4' onSubmit={handleSubmit}>
-        <input type='file' ref={imageInputRef} hidden accept='image/*' onChange={handleFileChange} />
-        <img src='/assets/avatar.png' art='avatar'
-          className='h-24 w-24 rounded-full object-cover cursor-pointer self-center mt-2 border-2 p-0.5 border-slate-200'
-          onClick={() => imageInputRef.current?.click()} />
+    <main className='max-w-6xl flex flex-col items-start justify-center md:flex-row p-4 gap-8 mx-auto'>
+      <div className='p-3 max-w-lg w-full'>
+        <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
+        <form id='profile-form' className='flex flex-col gap-4' onSubmit={handleSubmit}>
+          <input type='file' ref={imageInputRef} hidden accept='image/*' onChange={handleFileChange} />
+          <img src='/assets/avatar.png' art='avatar'
+            className='h-24 w-24 rounded-full object-cover cursor-pointer self-center mt-2 border-2 p-0.5 border-slate-200'
+            onClick={() => imageInputRef.current?.click()} />
 
-        <input
-          type="text"
-          placeholder='Username'
-          id='username'
-          autoComplete='username'
-          value={formData?.username}
-          className='border rounded-lg p-3 max-w-lg'
-          onChange={handleInputChange}
-        />
-        <input
-          type="email"
-          placeholder='Email'
-          id='email'
-          value={formData?.email}
-          autoComplete='email'
-          className='border rounded-lg p-3 max-w-lg'
-          onChange={handleInputChange}
-        />
-        <input type="password" placeholder='Password' id='password'
-          className='border rounded-lg p-3 max-w-lg'
-          onChange={handleInputChange}
-        />
+          <input
+            type="text"
+            placeholder='Username'
+            id='username'
+            autoComplete='username'
+            value={formData?.username}
+            className='border rounded-lg p-3'
+            onChange={handleInputChange}
+          />
+          <input
+            type="email"
+            placeholder='Email'
+            id='email'
+            value={formData?.email}
+            autoComplete='email'
+            className='border rounded-lg p-3'
+            onChange={handleInputChange}
+          />
+          <input type="password" placeholder='Password' id='password'
+            className='border rounded-lg p-3'
+            onChange={handleInputChange}
+          />
 
-        <button
-          type='submit'
-          disabled={loading}
-          className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opcaity-95 disabled:opacity-80 cursor-pointer flex justify-center items-center gap-2'
-        >
-          Update
-          {loading && <svg height={16} width={16} viewBox='0 0 1024 1024' className='animate-spin'>
-            <path d="M876.864 782.592c3.264 0 6.272-3.2 6.272-6.656 0-3.456-3.008-6.592-6.272-6.592-3.264 0-6.272 3.2-6.272 6.592 0 
+          <button
+            type='submit'
+            disabled={loading}
+            className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opcaity-95 disabled:opacity-80 cursor-pointer flex justify-center items-center gap-2'
+          >
+            Update
+            {loading && <svg height={16} width={16} viewBox='0 0 1024 1024' className='animate-spin'>
+              <path d="M876.864 782.592c3.264 0 6.272-3.2 6.272-6.656 0-3.456-3.008-6.592-6.272-6.592-3.264 0-6.272 3.2-6.272 6.592 0 
             3.456 3.008 6.656 6.272 6.656z m-140.544 153.344c2.304 2.432 5.568 3.84 8.768 3.84a12.16 12.16 0 0 0 8.832-3.84 13.76 
             13.76 0 0 0 0-18.56 12.224 12.224 0 0 0-8.832-3.84 12.16 12.16 0 0 0-8.768 3.84 13.696 13.696 0 0 0 0 18.56zM552.32 
             1018.24c3.456 3.648 8.32 5.76 13.184 5.76a18.368 18.368 0 0 0 13.184-5.76 20.608 20.608 0 0 0 0-27.968 18.368 18.368 
@@ -206,56 +211,44 @@ const Profile = () => {
             0 42.24-9.216 57.152-25.088a89.344 89.344 0 0 0 0-121.088 79.616 79.616 0 0 0-57.152-25.088c-21.184 0-42.24 9.216-57.216 
             25.088a89.344 89.344 0 0 0 0 121.088z m50.432 204.032c16.128 17.088 38.784 27.008 61.632 27.008 22.784 0 45.44-9.92 
             61.568-27.008a96.256 96.256 0 0 0 0-130.432 85.76 85.76 0 0 0-61.568-27.072c-22.848 0-45.44 9.984-61.632 27.072a96.192 96.192 0 0 0 0 130.432z"
-              fill="#ffffff"></path>
-          </svg>}
-        </button>
+                fill="#ffffff"></path>
+            </svg>}
+          </button>
 
-        <button
-          type='button'
-          onClick={handleCreateList}
-          className='bg-green-700 text-white p-3 rounded-lg uppercase hover:opcaity-95 disabled:opacity-80 cursor-pointer flex justify-center items-center gap-2'
-        >
-          Create List
-        </button>
-      </form>
+          <button
+            type='button'
+            onClick={handleCreateList}
+            className='bg-green-700 text-white p-3 rounded-lg uppercase hover:opcaity-95 disabled:opacity-80 cursor-pointer flex justify-center items-center gap-2'
+          >
+            Create List
+          </button>
+        </form>
 
-      <p className='text-red-700 mt-5'>{error ? error : ''}</p>
-      <p className='text-green-700 mt-5'>
-        {updateSuccess ? 'User is updated successfully!' : ''}
-      </p>
-
-
+        <p className='text-red-700 mt-5'>{error ? error : ''}</p>
+        <p className='text-green-700 mt-5'>
+          {updateSuccess ? 'User is updated successfully!' : ''}
+        </p>
 
 
-      <div className='flex flex-row items-center justify-between mt-4'>
-        <span className='text-red-400 font-semibold cursor-pointer hover:underline underline-offset-2' onClick={handleDeleteUser}>Delete Account</span>
-        <span className='text-red-400 font-semibold cursor-pointer hover:underline underline-offset-2' onClick={handleSignOut}>Sign Out</span>
+
+
+        <div className='flex flex-row items-center justify-between mt-4'>
+          <span className='text-red-400 font-semibold cursor-pointer hover:underline underline-offset-2' onClick={handleDeleteUser}>Delete Account</span>
+          <span className='text-red-400 font-semibold cursor-pointer hover:underline underline-offset-2' onClick={handleSignOut}>Sign Out</span>
+        </div>
       </div>
 
-      <div className='flex flex-col justify-center items-center my-7'>
-        <button
-          type='button'
-          onClick={handleGetUserList}
-          className='bg-transparent text-slate-700 font-semibold border rounded-xl w-[60%] px-4 py-3 underline-offset-1 hover:bg-slate-700 hover:text-white'
-        >
-          Show My List
-        </button>
-        <div className='mt-2 w-full'>
-          {userListings.length > 0 &&
-            <div className='flex flex-row justify-between items-end'>
-              <h1 className='my-4 font-semibold'>My Listings:</h1>
-              <button onClick={() => setUserListings([])}
-                className='mr-4 mb-2 h-8 px-2 text-xs hover:underline'>Hidden</button>
-            </div>
-          }
-
-
+      {userListings.length > 0 &&
+        <div className='mt-2 max-w-lg w-full md:mt-48'>
+          <h1 className='text-2xl font-semibold mb-4'>My Listings</h1>
           {userListings.map((item, index) => (
             <ListItem key={index} listingItem={item} setUserListings={setUserListings} />
           ))}
         </div>
-      </div>
-    </div>
+      }
+
+    </main>
+
   )
 }
 

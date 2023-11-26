@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { PlusOutlined } from '@ant-design/icons';
 import { Form, Button, Checkbox, Input, InputNumber, Upload, message, Row, Col, Modal } from 'antd';
 
+import { uniqueArrayMerge } from '../utils/tools';
+
 const API_URL = import.meta.env.VITE_REACT_APP_BASE_API_URL;
 const { TextArea } = Input;
 // const getBase64 = (img, callback) => {
@@ -29,22 +31,21 @@ const CreateList = () => {
 	const [previewTitle, setPreviewTitle] = useState('');
 
 	const [fileList, setFileList] = useState([]);
-	const [uploadedList, setUploadedList] = useState([])
+	const [defaultFileList, setDefaultFileList] = useState([])
 	const [listTypes, setListTypes] = useState(['rent']);
 
 	const [uploading, setUploading] = useState(false);
 
-	// saveStatus 0: new, 1: base info saved, 2: images uploaded 
-	const [saveStatus, setSaveStatus] = useState(0);
+	const [formDataChanged, setFormDataChanged] = useState(false);
 
 	const handleFormFinish = async (data) => {
-		if(saveStatus ===2) {
-			message.info('List aready saved.');
-			return
-		}
+		// do nothing while form data not changed.
+		if (!formDataChanged) return;
+
 		// Save Info to Db
-		const list = { ...data, userId: currentUser.id, types: listTypes }
+		const list = { ...data, types: listTypes }
 		try {
+			setUploading(true)
 			const res = await fetch(API_URL + '/api/listing/create', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -53,31 +54,32 @@ const CreateList = () => {
 			})
 			const result = await res.json();
 			if (result.success) {
-				setSaveStatus(1)
 				// Update Images info of Db
-				const listId = result.data.id;
-				handleUpload(listId);
+				const listingId = result.data.id;
+				handleUpload(listingId);
 			}
 		} catch (error) {
 			message.error(error.message);
+		} finally {
+			setUploading(false);
 		}
 	};
 
 	const handleUploadChange = ({ file, fileList }) => {
 		setFileList(fileList);
-		if (file.status !== 'uploading') {
-			console.log(file, fileList);
-		}
-		if (file.status === 'done') {
-			console.log('upload:', file.response.data);
-			file.uploadName = file.response.data
-			// message.success(`${file.name} file uploaded successfully`);
-			// getBase64(file.originFileObj, (url) => {
-			// 	console.log('url', url)
-			// })
-		} else if (file.status === 'error') {
-			message.error(`${file.name} file upload failed.`);
-		}
+		// if (file.status !== 'uploading') {
+		// 	console.log(file, fileList);
+		// }
+		// if (file.status === 'done') {
+		// 	console.log('upload:', file.response.data);
+		// 	file.uploadName = file.response.data
+		// 	// message.success(`${file.name} file uploaded successfully`);
+		// 	// getBase64(file.originFileObj, (url) => {
+		// 	// 	console.log('url', url)
+		// 	// })
+		// } else if (file.status === 'error') {
+		// 	message.error(`${file.name} file upload failed.`);
+		// }
 	};
 
 	const handleUploadRemove = async (file) => {
@@ -131,7 +133,7 @@ const CreateList = () => {
 		withCredentials: true,
 		accept: 'image/jpeg, image/png',
 		fileList: fileList,
-		defaultFileList: uploadedList,
+		defaultFileList: defaultFileList,
 		beforeUpload: handleBeforeUpload,
 		onChange: handleUploadChange,
 		onRemove: handleUploadRemove,
@@ -150,15 +152,25 @@ const CreateList = () => {
 		setListTypes(checkedValues);
 	};
 
-	const handleUpload = (listId) => {
-		if (fileList.length === 0) return;
+	const handleUpload = (listingId) => {
+		if (fileList.length === 0) {
+			setFormDataChanged(false)
+			return;
+		}
+		console.log('upload image files.')
+		console.log('defaultfilelist', defaultFileList)
+		console.log('filelist', fileList)
 
 		setUploading(true);
 
 		const formData = new FormData();
 		fileList.forEach((file) => {
-			formData.append('listId', listId);
-			formData.append('files', file.originFileObj);
+			const uploadedFile = defaultFileList.find(item => item.uid === file.uid)
+			if (!uploadedFile) {
+				formData.append('listingId', listingId);
+				formData.append('files', file.originFileObj);
+				console.log(file.name)
+			}
 		});
 
 		// You can use any AJAX library you like
@@ -170,8 +182,8 @@ const CreateList = () => {
 			.then((res) => res.json())
 			.then((result) => {
 				if (result.success) {
-					setSaveStatus(2);
-					setUploadedList(fileList);
+					setFormDataChanged(false)
+					setDefaultFileList(uniqueArrayMerge(defaultFileList, fileList, 'uid'))
 					message.success('upload successfully.');
 				} else {
 					message.error('upload images error')
@@ -189,10 +201,11 @@ const CreateList = () => {
 
 	return (
 		<main className='p-3 max-w-4xl mx-auto'>
-			<h1 className='text-3xl font-semibold text-center my-7'> Create a List</h1>
+			<h1 className='text-3xl font-semibold text-center my-7'>Create a List</h1>
 
 			<Form
 				onFinish={handleFormFinish}
+				onChange={() => setFormDataChanged(true)}
 				name='list-form'
 				autoComplete='off'
 				labelCol={{ flex: '110px' }}
@@ -240,14 +253,6 @@ const CreateList = () => {
 						<Form.Item label='Quantity'>
 							<Row gutter={24}>
 								<Col>
-									<Form.Item name='baths' noStyle>
-										<InputNumber min={1} max={99} />
-									</Form.Item>
-									<span className="ml-2 text-red-400" >
-										Baths
-									</span>
-								</Col>
-								<Col>
 									<Form.Item name='beds' noStyle>
 										<InputNumber min={1} max={99} />
 									</Form.Item>
@@ -255,6 +260,16 @@ const CreateList = () => {
 										Beds
 									</span>
 								</Col>
+								
+								<Col>
+									<Form.Item name='baths' noStyle>
+										<InputNumber min={1} max={99} />
+									</Form.Item>
+									<span className="ml-2 text-red-400" >
+										Baths
+									</span>
+								</Col>
+								
 							</Row>
 
 						</Form.Item>
@@ -298,7 +313,7 @@ const CreateList = () => {
 							danger
 							disabled={uploading}
 							htmlType="reset"
-							onClick={() => setFileList([])}
+							onClick={() => { setFileList([]); setDefaultFileList([]); setFormDataChanged(false) }}
 						>
 							reset
 						</Button>

@@ -22,19 +22,36 @@ export const uploadFile = (req, res) => {
 };
 
 export const uploadFiles = (req, res) => {
-    if (req.body.listId) {
-        const listId = req.body.listId[0];
-        const images = JSON.stringify(req.files)
+    if (req.body.listingId) {
+        const listingId = Array.isArray(req.body.listingId) ? req.body.listingId[0] : req.body.listingId;
+        let images = req.files;
 
-        db.query('UPDATE Lists SET images = ? WHERE id = ?', [images, listId], (err, _) => {
-            if (err) return next(err)
-            res.status(201).json({
-                success: true,
-                message: 'Images updated',
-                data: { id: listId, images: req.files }
+        // console.log(listingId, images);
+
+        db.getConnection((err, connection) => {
+            if (err) next(err);
+
+            connection.query('SELECT images FROM Lists WHERE id = ? limit 1', listingId, (err, result) => {
+                if (result.length > 0 && result[0].images !== null) {
+                    const originImages = JSON.parse(result[0].images);
+                    images = [...originImages, ...images]
+                }
+
+                connection.query('UPDATE Lists SET images = ? WHERE id = ?', [JSON.stringify(images), listingId], (err, _) => {
+                    connection.release();
+                    if (err) return next(err);
+                    res.status(201).json({
+                        success: true,
+                        message: 'Images updated',
+                        data: { id: listingId, images: req.files }
+                    });
+                })
             })
-        })
+        });
+
+
     } else {
+        console.log('not update listing')
         res.status(201).json({
             success: true,
             message: 'files has been uploaded',

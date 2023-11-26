@@ -19,3 +19,8 @@ body {
 .ant-btn-primary {
     @apply bg-[#1677ff]
 }
+
+.ant-spin-dot-item {
+    /* background-color: orange !important; */
+    @apply bg-slate-700 !important
+  }
