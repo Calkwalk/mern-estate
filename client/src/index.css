@@ -24,3 +24,22 @@ body {
     /* background-color: orange !important; */
     @apply bg-slate-700 !important
   }
+
+
+  .ant-carousel .slick-prev,
+  .ant-carousel .slick-prev:hover,
+  .ant-carousel .slick-prev:focus {
+    font-size: 32px;
+    left: 10px;
+    z-index: 2;
+    color: white;
+  }
+
+  .ant-carousel .slick-next,
+  .ant-carousel .slick-next:hover,
+  .ant-carousel .slick-next:focus {
+    font-size: 32px;
+    right: 20px;
+    z-index: 2;
+    color: white;
+  }

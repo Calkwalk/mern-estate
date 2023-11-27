@@ -12,14 +12,18 @@ import {
     FaShare,
 } from 'react-icons/fa';
 
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+
 const API_URL = import.meta.env.VITE_REACT_APP_BASE_API_URL;
 
 const Listing = () => {
     const params = useParams();
     const [loading, setLoading] = useState(false);
+
     const [listing, setListing] = useState();
-    const [listTypes, setListTypes] = useState(['rent']);
+    const [benefit, setBenefit] = useState([]);
     const [images, setImages] = useState([])
+
     const [error, setError] = useState(false);
     const [copied, setCopied] = useState(false);
     const [contact, setContact] = useState(false);
@@ -42,8 +46,10 @@ const Listing = () => {
 
                 if (result.success) {
                     const listing = result.data
-                    setListTypes(JSON.parse(listing.types));
 
+                    console.log('listing', listing.listType)
+
+                    setBenefit(JSON.parse(listing.benefit));
                     setImages(JSON.parse(listing.images));
                     setListing(listing)
                 } else {
@@ -53,10 +59,7 @@ const Listing = () => {
                 setError(true)
                 console.log(error)
             } finally {
-                setTimeout(() => {
-                    setLoading(false)
-                }, 100);
-
+                setLoading(false)
             }
 
 
@@ -84,7 +87,10 @@ const Listing = () => {
 
             {!loading && images.length > 0 &&
                 <>
-                    <Carousel autoplay autoplaySpeed={5000} >
+                    <Carousel 
+                    autoplay autoplaySpeed={5000}  slidecount={3}
+                    arrows prevArrow={<LeftOutlined />} nextArrow={<RightOutlined />}
+                >
                         {images.map((image, index) => (
                             <div key={index} className='w-full h-[550px] bg-slate-700 flex items-center justify-center'>
                                 <img src={`${API_URL}/assets/upload/${image.filename}`} className='w-full h-[550px] object-contain' />
@@ -110,9 +116,9 @@ const Listing = () => {
             }
 
             {!loading && listing &&
-                <div className='mt-7 max-w-6xl bg-red-50 mx-auto p-3'>
+                <div className='mt-7 max-w-6xl mx-auto p-3'>
                     <h3 className='text-gray-700 font-semibold text-2xl'>
-                        {listing.listName} - <span className='font-normal text-xl text-red-400'>$ {listing.price} /month</span>
+                        {listing.listName} - <span className='font-normal text-xl text-red-400'>$ {(+listing.price).toFixed(2)} /month</span>
                     </h3>
 
                     <p className='flex items-center mt-6 gap-2 text-slate-600  text-sm'>
@@ -122,24 +128,24 @@ const Listing = () => {
 
                     <div className='flex gap-4 py-3'>
                         <p className='bg-red-900 w-full max-w-[200px] text-white text-center p-1 rounded-md'>
-                            {listing.type === 'rent' ? 'For Rent' : 'For Sale'}
+                            {listing.listType === 'rent' ? 'For Rent' : 'For Sale'}
                         </p>
-                        {listing.offer && (
+                        {benefit.includes('offer') && (
                             <p className='bg-green-900 w-full max-w-[200px] text-white text-center p-1 rounded-md'>
-                                ${+listing.regularPrice - +listing.discountPrice} OFF
+                                ${(+listing.price - +listing.offerPrice).toFixed(2)} OFF
                             </p>
                         )}
                     </div>
 
-                    <p className='text-slate-800'>
-                        <span className='font-semibold text-black'>Description - </span>
+                    <p className='text-slate-800 leading-8 line-clamp-8'>
+                        <span className='font-semibold text-black text-sm '>Description - </span>
                         {listing.description}
                     </p>
 
                     <ul className='text-green-900 font-semibold text-sm mt-2 flex flex-wrap items-center gap-4 sm:gap-6'>
                         <li className='flex items-center gap-1 whitespace-nowrap '>
                             <FaBed className='text-lg' />
-                            {listing.beds> 1
+                            {listing.beds > 1
                                 ? `${listing.beds} beds `
                                 : `${listing.beds} bed `}
                         </li>
@@ -149,14 +155,14 @@ const Listing = () => {
                                 ? `${listing.baths} baths `
                                 : `${listing.baths} bath `}
                         </li>
-                        {/* <li className='flex items-center gap-1 whitespace-nowrap '>
+                        <li className='flex items-center gap-1 whitespace-nowrap '>
                             <FaParking className='text-lg' />
-                            {listing.parking ? 'Parking spot' : 'No Parking'}
+                            {benefit.includes('parking') ? 'Parking spot' : 'No Parking'}
                         </li>
                         <li className='flex items-center gap-1 whitespace-nowrap '>
                             <FaChair className='text-lg' />
-                            {listing.furnished ? 'Furnished' : 'Unfurnished'}
-                        </li> */}
+                            {benefit.includes('furnished') ? 'Furnished' : 'Unfurnished'}
+                        </li>
                     </ul>
                 </div>
             }

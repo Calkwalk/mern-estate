@@ -6,11 +6,12 @@ import { jsonToHump } from '../utils/hump.js';
 
 export const createListing = (req, res, next) => {
     const userId = req.user.id;
-    const { listName, description, address, types, beds, baths, price } = req.body;
+    const { listName, description, address, listType, benefit, beds, baths, price, offerPrice } = req.body;
 
-    db.query('INSERT INTO Lists ( user_id, list_name, description, address, types, beds, baths, price ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    db.query('INSERT INTO Lists ( user_id, list_name, description, address, list_type, benefit, beds, baths, price, offer_price ) \
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
-            userId, listName, description, address, JSON.stringify(types), beds, baths, price
+            userId, listName.substr(0, 255), description.substr(0, 1024), address.substr(0,255), listType, JSON.stringify(benefit), beds, baths, price, offerPrice
         ], (err, result) => {
             if (err) return next(err)
             res.json({
@@ -81,12 +82,12 @@ export const deleteListing = async (req, res, next) => {
 
 export const updateListing = (req, res, next) => {
     const id = req.params.id;
-    const { listName, description, address, types, beds, baths, price } = req.body;
+    const { listName, description, address, listType, benefit, beds, baths, price, offerPrice } = req.body;
     db.getConnection((err, connection) => {
         if (err) next(err)
 
         // 1 find listing
-        connection.query('SELECT * FROM Lists WHERE id = ? limit 1', id, (err, result) => {
+        connection.query('SELECT user_id FROM Lists WHERE id = ? limit 1', id, (err, result) => {
             if (err) next(err);
 
             const existListing = jsonToHump(result);
@@ -100,11 +101,16 @@ export const updateListing = (req, res, next) => {
 
                 // 3 update
                 connection.query(
-                    'UPDATE Lists SET list_name = ?, description = ?, address = ?, types = ?, beds = ?, baths = ?, price = ?  WHERE id = ?',
-                    [listName, description, address, JSON.stringify(types), beds, baths, price, id], (err, result) => {
+                    'UPDATE Lists SET list_name = ?, description = ?, address = ?, \
+                    list_type = ?, benefit = ?, beds = ?, baths = ?, price = ?, offer_price = ?  WHERE id = ?',
+                    [listName.substr(0, 255), description.substr(0, 1024), address.substr(0,255), listType, JSON.stringify(benefit), beds, baths, price, offerPrice, id], (err, result) => {
                         connection.release();
 
-                        if (err) next(err)
+                        if (err){
+                            // return next(err)
+                            console.log(err);
+                            next(err);
+                        }
 
                         res.json({
                             success: true,

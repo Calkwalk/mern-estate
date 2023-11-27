@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { PlusOutlined } from '@ant-design/icons';
-import { Form, Button, Checkbox, Input, InputNumber, Upload, message, Row, Col, Modal } from 'antd';
+import { Form, Button, Checkbox, Radio, Input, InputNumber, Upload, message, Row, Col, Modal } from 'antd';
 
 import { uniqueArrayMerge } from '../utils/tools';
 
@@ -32,25 +32,27 @@ const CreateList = () => {
 
 	const [fileList, setFileList] = useState([]);
 	const [defaultFileList, setDefaultFileList] = useState([])
-	const [listTypes, setListTypes] = useState(['rent']);
+	const [listType, setListType] = useState('rent');
 
 	const [uploading, setUploading] = useState(false);
 
 	const [formDataChanged, setFormDataChanged] = useState(false);
+	const [showOfferPrice, setShowOfferPrice] = useState(false);
+
+	const [form] = Form.useForm();
 
 	const handleFormFinish = async (data) => {
 		// do nothing while form data not changed.
 		if (!formDataChanged) return;
 
 		// Save Info to Db
-		const list = { ...data, types: listTypes }
 		try {
 			setUploading(true)
 			const res = await fetch(API_URL + '/api/listing/create', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				credentials: 'include',
-				body: JSON.stringify(list),
+				body: JSON.stringify(data),
 			})
 			const result = await res.json();
 			if (result.success) {
@@ -140,26 +142,41 @@ const CreateList = () => {
 		onPreview: handlePreview
 	};
 
-	const optionsWithListType = [
-		{ label: 'Sell', value: 'sell' },
-		{ label: 'Rent', value: 'rent' },
-		{ label: 'Packing spot', value: 'packing-spot' },
-		{ label: 'Furnished', value: 'furnished' },
-		{ label: 'Offer', value: 'offer' },
-	];
+	const handleTypeChange = (e) => {
+		e.preventDefault()
+		const val = e.target.value;
+		setListType(val);
+	}
 
-	const handleListTypeChange = (checkedValues) => {
-		setListTypes(checkedValues);
+	const handleBenefitChange = (checkedValues) => {
+
+		const showOffer = checkedValues.includes('offer')
+		setShowOfferPrice(showOffer);
+		if (!showOffer) {
+			form.setFieldValue(
+				'offerPrice',
+				form.getFieldValue('price')
+			)
+
+		}
+
 	};
+
+	const handlePriceChange = (val) => {
+		if (!showOfferPrice) {
+			form.setFieldValue(
+				'offerPrice',
+				val
+			)
+
+		}
+	}
 
 	const handleUpload = (listingId) => {
 		if (fileList.length === 0) {
 			setFormDataChanged(false)
 			return;
 		}
-		console.log('upload image files.')
-		console.log('defaultfilelist', defaultFileList)
-		console.log('filelist', fileList)
 
 		setUploading(true);
 
@@ -204,12 +221,13 @@ const CreateList = () => {
 			<h1 className='text-3xl font-semibold text-center my-7'>Create a List</h1>
 
 			<Form
+				form={form}
 				onFinish={handleFormFinish}
 				onChange={() => setFormDataChanged(true)}
 				name='list-form'
 				autoComplete='off'
 				labelCol={{ flex: '110px' }}
-				initialValues={{ beds: 1, baths: 1, price: 9.9 }}
+				initialValues={{ listType: 'rent', benefit: null, beds: 1, baths: 1, price: 9.9, offerPrice: 9.9 }}
 			>
 				<div className='flex flex-col sm:flex-row gap-6'>
 					<div>
@@ -246,8 +264,23 @@ const CreateList = () => {
 							<Input />
 						</Form.Item>
 
-						<Form.Item label='Type'>
+						{/* <Form.Item label='Type'>
 							<Checkbox.Group options={optionsWithListType} defaultValue={listTypes} onChange={handleListTypeChange} />
+						</Form.Item > */}
+
+						<Form.Item label='Type' name='listType'>
+							<Radio.Group onChange={handleTypeChange}>
+								<Radio value={'sell'}>Sell</Radio>
+								<Radio value={'rent'}>Rent</Radio>
+							</Radio.Group>
+						</Form.Item>
+
+						<Form.Item label='Benefit' name='benefit'>
+							<Checkbox.Group onChange={handleBenefitChange}>
+								<Checkbox value={'parking'}>Parking Spot</Checkbox>
+								<Checkbox value={'furnished'}>Furnished</Checkbox>
+								<Checkbox value={'offer'}>Offer</Checkbox>
+							</Checkbox.Group>
 						</Form.Item >
 
 						<Form.Item label='Quantity'>
@@ -260,7 +293,7 @@ const CreateList = () => {
 										Beds
 									</span>
 								</Col>
-								
+
 								<Col>
 									<Form.Item name='baths' noStyle>
 										<InputNumber min={1} max={99} />
@@ -269,17 +302,26 @@ const CreateList = () => {
 										Baths
 									</span>
 								</Col>
-								
+
 							</Row>
 
 						</Form.Item>
 
 						<Form.Item label='Price'>
 							<Form.Item name='price' noStyle>
+								<InputNumber min={0.01} max={9999999.99} onChange={handlePriceChange} />
+							</Form.Item>
+							<span className="ml-2 text-red-400 text-xs pt-4" >
+								{listType === 'rent' ? '$/Month' : '$/Set'}
+							</span>
+						</Form.Item>
+
+						<Form.Item label='Offer' hidden={!showOfferPrice}>
+							<Form.Item name='offerPrice' noStyle>
 								<InputNumber min={0.01} max={9999999.99} />
 							</Form.Item>
 							<span className="ml-2 text-red-400 text-xs pt-4" >
-								$/Month
+								{listType === 'rent' ? '$/Month' : '$/Set'}
 							</span>
 						</Form.Item>
 					</div>

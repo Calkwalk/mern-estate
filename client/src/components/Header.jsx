@@ -34,7 +34,7 @@ const Header = () => {
             <li className='hidden sm:inline text-slate-700 hover:underline'>About</li>
           </Link>
           <Link to='/profile'>
-            {currentUser && cookies['access_token']
+            {currentUser
               ? (
                 <div className='flex flex-row items-end justify-center gap-2'>
                   <div className='h-10 w-10 rounded-full bg-slate-500 flex justify-center items-center shadow-md shadow-slate-400'>

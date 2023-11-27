@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { PlusOutlined } from '@ant-design/icons';
-import { Form, Button, Checkbox, Input, InputNumber, Upload, message, Row, Col, Modal } from 'antd';
+import { Form, Button, Checkbox, Radio, Input, InputNumber, Upload, message, Row, Col, Modal } from 'antd';
 
 import { uniqueArrayMerge } from '../utils/tools';
 
@@ -35,11 +35,12 @@ const UpdateList = () => {
     const [previewTitle, setPreviewTitle] = useState('');
 
     const [fileList, setFileList] = useState([]);
-    const [listTypes, setListTypes] = useState(['rent']);
+    const [listType, setListType] = useState('rent');
 
     const [uploading, setUploading] = useState(false);
 
     const [formDataChanged, setFormDataChanged] = useState(false);
+    const [showOfferPrice, setShowOfferPrice] = useState(false);
 
     const [form] = Form.useForm();
 
@@ -55,30 +56,36 @@ const UpdateList = () => {
             const result = await res.json();
 
             const listing = result.data
-
+            const benefit = JSON.parse(listing.benefit)
             form.setFieldsValue({
                 listName: listing.listName,
                 description: listing.description,
                 address: listing.address,
+                listType: listing.listType,
+                benefit: benefit,
                 beds: listing.beds,
                 baths: listing.baths,
-                price: listing.price
+                price: listing.price,
+                offerPrice: listing.offerPrice
             });
-            setListTypes(JSON.parse(listing.types));
+            setListType(listing.listType);
+            const showOffer = benefit.includes('offer');
+            setShowOfferPrice(showOffer);
 
             const images = JSON.parse(listing.images)
-            let imageList = [];
-            images.map(img => {
-                imageList.push({
-                    uid: img.filename,
-                    name: img.originalname,
-                    status: 'done',
-                    url: API_URL + '/assets/upload/' + img.filename
+            if (images) {
+                let imageList = [];
+                images.map(img => {
+                    imageList.push({
+                        uid: img.filename,
+                        name: img.originalname,
+                        status: 'done',
+                        url: API_URL + '/assets/upload/' + img.filename
+                    })
                 })
-            })
-
-            setDefaultFileList(imageList);
-            setFileList(imageList);
+                setDefaultFileList(imageList);
+                setFileList(imageList);
+            }
 
             if (result.success) { setListing(listing) };
 
@@ -88,18 +95,20 @@ const UpdateList = () => {
     }, []);
 
     const handleFormFinish = async (data) => {
+
+        // console.log(data)
+        
         // do nothing while form data not changed.
         if (!formDataChanged) return;
 
         // Save Info to Db
-        const list = { ...data, types: listTypes }
         try {
             setUploading(true)
             const res = await fetch(API_URL + '/api/listing/update/' + params.id, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify(list),
+                body: JSON.stringify(data),
             })
             const result = await res.json();
             if (result.success) {
@@ -189,17 +198,34 @@ const UpdateList = () => {
         onPreview: handlePreview
     };
 
-    const optionsWithListType = [
-        { label: 'Sell', value: 'sell' },
-        { label: 'Rent', value: 'rent' },
-        { label: 'Packing spot', value: 'packing-spot' },
-        { label: 'Furnished', value: 'furnished' },
-        { label: 'Offer', value: 'offer' },
-    ];
+    const handleTypeChange = (e) => {
+        e.preventDefault()
+        const val = e.target.value;
+        setListType(val);
+    }
+    const handleBenefitChange = (checkedValues) => {
+        console.log(checkedValues)
+        const showOffer = checkedValues.includes('offer')
+        setShowOfferPrice(showOffer);
+        if (!showOffer) {
+            form.setFieldValue(
+                'offerPrice',
+                form.getFieldValue('price')
+            )
 
-    const handleListTypeChange = (checkedValues) => {
-        setListTypes(checkedValues);
+        }
+
     };
+
+    const handlePriceChange = (val) => {
+        if (!showOfferPrice) {
+            form.setFieldValue(
+                'offerPrice',
+                val
+            )
+
+        }
+    }
 
     const handleUpload = (listingId) => {
         if (fileList.length === 0) {
@@ -261,7 +287,7 @@ const UpdateList = () => {
             >
                 <div className='flex flex-col sm:flex-row gap-6'>
                     <div>
-                        <Form.Item label='List Name' name='listName' initialValue={listing?.listName} value={'abcadsb'}
+                        <Form.Item label='List Name' name='listName'
                             rules={[
                                 {
                                     required: true,
@@ -294,13 +320,27 @@ const UpdateList = () => {
                             <Input />
                         </Form.Item>
 
-                        <Form.Item label='Type'>
-                            <Checkbox.Group options={optionsWithListType} value={listTypes} onChange={handleListTypeChange} />
+                        {/* <Form.Item label='Type'>
+							<Checkbox.Group options={optionsWithListType} defaultValue={listTypes} onChange={handleListTypeChange} />
+						</Form.Item > */}
+
+                        <Form.Item label='Type' name='listType'>
+                            <Radio.Group onChange={handleTypeChange}>
+                                <Radio value={'sell'}>Sell</Radio>
+                                <Radio value={'rent'}>Rent</Radio>
+                            </Radio.Group>
+                        </Form.Item>
+
+                        <Form.Item label='Benefit' name='benefit'>
+                            <Checkbox.Group onChange={handleBenefitChange}>
+                                <Checkbox value={'parking'}>Parking Spot</Checkbox>
+                                <Checkbox value={'furnished'}>Furnished</Checkbox>
+                                <Checkbox value={'offer'}>Offer</Checkbox>
+                            </Checkbox.Group>
                         </Form.Item >
 
                         <Form.Item label='Quantity'>
                             <Row gutter={24}>
-                                
                                 <Col>
                                     <Form.Item name='beds' noStyle>
                                         <InputNumber min={1} max={99} />
@@ -318,17 +358,26 @@ const UpdateList = () => {
                                         Baths
                                     </span>
                                 </Col>
-                                
+
                             </Row>
 
                         </Form.Item>
 
                         <Form.Item label='Price'>
                             <Form.Item name='price' noStyle>
+                                <InputNumber min={0.01} max={9999999.99} onChange={handlePriceChange} />
+                            </Form.Item>
+                            <span className="ml-2 text-red-400 text-xs pt-4" >
+                                {listType === 'rent' ? '$/Month' : '$/Set'}
+                            </span>
+                        </Form.Item>
+
+                        <Form.Item label='Offer' hidden={!showOfferPrice}>
+                            <Form.Item name='offerPrice' noStyle>
                                 <InputNumber min={0.01} max={9999999.99} />
                             </Form.Item>
                             <span className="ml-2 text-red-400 text-xs pt-4" >
-                                $/Month
+                                {listType === 'rent' ? '$/Month' : '$/Set'}
                             </span>
                         </Form.Item>
                     </div>
