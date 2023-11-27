@@ -42,18 +42,46 @@ export const deleteUser = async (req, res, next) => {
 };
 
 export const getUserListing = async (req, res, next) => {
+    const userId = req.params.id;
+    if(req.user.id !== userId) {
+        return next(errorHandler(401, 'Unauthorized'))
+    }
 
-    // res.json({message: 'ok'})
+    db.query('SELECT * FROM Lists WHERE user_id = ?', userId, (err, result) => {
+        if (err) next(err);
 
-    // if (req.user.id !== req.params.id)
-    //     return next(errorHandler(401, 'You can only query your own account!'));
-
-    db.query('SELECT * FROM Lists WHERE user_id = ?', req.params.id, (err, result) => {
-        if (err) return next(err);
         res.json({
             success: true,
-            message: 'Query data successed',
+            message: 'Listing query success',
             data: jsonToHump(result)
-        })
-    })
+        });
+    });
+    
 };
+
+export const getUserInfo= async (req, res, next) => {
+    const userId = req.params.id;
+
+    console.log('userId', userId)
+
+    db.query('SELECT * FROM Users WHERE id = ? limit 1', userId, (err, result) => {
+        if (err) next(err);
+
+        const existUsers = jsonToHump(result);
+        if (existUsers.length > 0) {
+            const currentUser = existUsers[0];
+
+            res.json({
+                success: true,
+                message: 'Get User info completed',
+                data: {
+                    id: currentUser.id,
+                    username: currentUser.username,
+                    email: currentUser.email
+                }
+            });
+        } else {
+            res.json(errorHandler(404, 'User not found'))
+        }
+    });
+}

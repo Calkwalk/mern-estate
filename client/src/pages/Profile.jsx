@@ -36,7 +36,11 @@ const Profile = () => {
     const fetchUserListings = () => {
       //set query status
 
-      fetch(API_URL + '/api/user/listing/' + currentUser.id)
+      fetch(API_URL + '/api/user/listing/' + currentUser.id, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      })
         .then((res) => res.json())
         .then((result) => {
           if (result.success) {

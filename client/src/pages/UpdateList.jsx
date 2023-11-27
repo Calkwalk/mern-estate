@@ -56,20 +56,20 @@ const UpdateList = () => {
             const result = await res.json();
 
             const listing = result.data
-            const benefit = JSON.parse(listing.benefit)
+            const amenities = JSON.parse(listing.amenities)
             form.setFieldsValue({
                 listName: listing.listName,
                 description: listing.description,
                 address: listing.address,
                 listType: listing.listType,
-                benefit: benefit,
+                amenities: amenities,
                 beds: listing.beds,
                 baths: listing.baths,
                 price: listing.price,
                 offerPrice: listing.offerPrice
             });
             setListType(listing.listType);
-            const showOffer = benefit.includes('offer');
+            const showOffer = amenities.includes('offer');
             setShowOfferPrice(showOffer);
 
             const images = JSON.parse(listing.images)
@@ -203,7 +203,7 @@ const UpdateList = () => {
         const val = e.target.value;
         setListType(val);
     }
-    const handleBenefitChange = (checkedValues) => {
+    const handleAmenitiesChange = (checkedValues) => {
         console.log(checkedValues)
         const showOffer = checkedValues.includes('offer')
         setShowOfferPrice(showOffer);
@@ -331,8 +331,8 @@ const UpdateList = () => {
                             </Radio.Group>
                         </Form.Item>
 
-                        <Form.Item label='Benefit' name='benefit'>
-                            <Checkbox.Group onChange={handleBenefitChange}>
+                        <Form.Item label='Amenities' name='amenities'>
+                            <Checkbox.Group onChange={handleAmenitiesChange}>
                                 <Checkbox value={'parking'}>Parking Spot</Checkbox>
                                 <Checkbox value={'furnished'}>Furnished</Checkbox>
                                 <Checkbox value={'offer'}>Offer</Checkbox>

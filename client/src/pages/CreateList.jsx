@@ -148,7 +148,7 @@ const CreateList = () => {
 		setListType(val);
 	}
 
-	const handleBenefitChange = (checkedValues) => {
+	const handleAmenitiesChange = (checkedValues) => {
 
 		const showOffer = checkedValues.includes('offer')
 		setShowOfferPrice(showOffer);
@@ -227,7 +227,7 @@ const CreateList = () => {
 				name='list-form'
 				autoComplete='off'
 				labelCol={{ flex: '110px' }}
-				initialValues={{ listType: 'rent', benefit: null, beds: 1, baths: 1, price: 9.9, offerPrice: 9.9 }}
+				initialValues={{ listType: 'rent', amenities: null, beds: 1, baths: 1, price: 9.9, offerPrice: 9.9 }}
 			>
 				<div className='flex flex-col sm:flex-row gap-6'>
 					<div>
@@ -275,8 +275,8 @@ const CreateList = () => {
 							</Radio.Group>
 						</Form.Item>
 
-						<Form.Item label='Benefit' name='benefit'>
-							<Checkbox.Group onChange={handleBenefitChange}>
+						<Form.Item label='Amenities' name='amenities'>
+							<Checkbox.Group onChange={handleAmenitiesChange}>
 								<Checkbox value={'parking'}>Parking Spot</Checkbox>
 								<Checkbox value={'furnished'}>Furnished</Checkbox>
 								<Checkbox value={'offer'}>Offer</Checkbox>

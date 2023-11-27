@@ -6,12 +6,12 @@ import { jsonToHump } from '../utils/hump.js';
 
 export const createListing = (req, res, next) => {
     const userId = req.user.id;
-    const { listName, description, address, listType, benefit, beds, baths, price, offerPrice } = req.body;
+    const { listName, description, address, listType, amenities, beds, baths, price, offerPrice } = req.body;
 
-    db.query('INSERT INTO Lists ( user_id, list_name, description, address, list_type, benefit, beds, baths, price, offer_price ) \
+    db.query('INSERT INTO Lists ( user_id, list_name, description, address, list_type, amenities, beds, baths, price, offer_price ) \
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
-            userId, listName.substr(0, 255), description.substr(0, 1024), address.substr(0,255), listType, JSON.stringify(benefit), beds, baths, price, offerPrice
+            userId, listName.substr(0, 255), description.substr(0, 1024), address.substr(0, 255), listType, JSON.stringify(amenities), beds, baths, price, offerPrice
         ], (err, result) => {
             if (err) return next(err)
             res.json({
@@ -82,7 +82,7 @@ export const deleteListing = async (req, res, next) => {
 
 export const updateListing = (req, res, next) => {
     const id = req.params.id;
-    const { listName, description, address, listType, benefit, beds, baths, price, offerPrice } = req.body;
+    const { listName, description, address, listType, amenities, beds, baths, price, offerPrice } = req.body;
     db.getConnection((err, connection) => {
         if (err) next(err)
 
@@ -102,11 +102,11 @@ export const updateListing = (req, res, next) => {
                 // 3 update
                 connection.query(
                     'UPDATE Lists SET list_name = ?, description = ?, address = ?, \
-                    list_type = ?, benefit = ?, beds = ?, baths = ?, price = ?, offer_price = ?  WHERE id = ?',
-                    [listName.substr(0, 255), description.substr(0, 1024), address.substr(0,255), listType, JSON.stringify(benefit), beds, baths, price, offerPrice, id], (err, result) => {
+                    list_type = ?, amenities = ?, beds = ?, baths = ?, price = ?, offer_price = ?  WHERE id = ?',
+                    [listName.substr(0, 255), description.substr(0, 1024), address.substr(0, 255), listType, JSON.stringify(amenities), beds, baths, price, offerPrice, id], (err, result) => {
                         connection.release();
 
-                        if (err){
+                        if (err) {
                             // return next(err)
                             console.log(err);
                             next(err);
@@ -129,37 +129,38 @@ export const updateListing = (req, res, next) => {
 
 };
 
-export const getListing = (req, res, next) => {
-    const id = req.params.id;
-    db.getConnection((err, connection) => {
-        if (err) next(err)
+export const getListingById = (req, res, next) => {
+    const listingId = req.params.id
 
-        // 1 find listing
-        connection.query('SELECT * FROM Lists WHERE id = ? limit 1', id, (err, result) => {
-            connection.release();
+    db.query('SELECT * FROM Lists WHERE id = ? limit 1', listingId, (err, result) => {
+        if (err) return next(err);
+        const existListing = jsonToHump(result);
+        if (existListing.length > 0) {
+            const currentListing = existListing[0];
 
-            if (err) next(err);
+            res.json({
+                success: true,
+                message: 'Listing query success',
+                data: currentListing
+            });
+        } else {
+            res.json(errorHandler(404, 'Listing not found'))
+        }
 
-            const existListing = jsonToHump(result);
-            if (existListing.length > 0) {
-                const currentListing = existListing[0];
+    })
 
-                // 2 check owner
-                if (req.user.id !== currentListing.userId) {
-                    res.json(errorHandler(403, 'You can only update your own listing'))
-                } else {
-                    res.json({
-                        success: true,
-                        message: 'Listing query success',
-                        data: currentListing
-                    });
-                }
+};
 
-            } else {
-                res.json(errorHandler(404, 'Listing not found'))
-            }
-
+export const getListings = (req, res, next) => {
+    db.query('SELECT * FROM Lists', (err, result) => {
+        if (err) return next(err);
+        
+        res.json({
+            success: true,
+            message: 'Listing query success',
+            data: jsonToHump(result)
         });
-    });
+
+    })
 
 };
