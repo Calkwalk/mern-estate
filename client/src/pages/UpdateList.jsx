@@ -48,7 +48,7 @@ const UpdateList = () => {
         const fetchListing = async () => {
             const listingId = params.id;
 
-            const res = await fetch(API_URL + '/api/listing/' + listingId, {
+            const res = await fetch(API_URL + '/api/listing/id/' + listingId, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -283,7 +283,7 @@ const UpdateList = () => {
                 name='list-form'
                 autoComplete='off'
                 labelCol={{ flex: '110px' }}
-                initialValues={{ beds: 1, baths: 1, price: 9.9 }}
+                // initialValues={{ beds: 1, baths: 1, price: 9.9 }}
             >
                 <div className='flex flex-col sm:flex-row gap-6'>
                     <div>

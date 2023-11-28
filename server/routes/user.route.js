@@ -8,6 +8,6 @@ router.post('/update/:id', verifyToken, updateUser);
 router.delete('/delete/:id', verifyToken, deleteUser);
 
 router.get('/listing/:id', verifyToken, getUserListing);
-router.get('/:id', verifyToken, getUserInfo);
+router.get('/id/:id', verifyToken, getUserInfo);
 
 export default router;

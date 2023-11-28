@@ -12,7 +12,7 @@ const Contact = ({ listing }) => {
 
     useEffect(() => {
         const fetchLandlord = () => {
-            fetch(API_URL + '/api/user/' + listing.userId, {
+            fetch(API_URL + '/api/user/id/' + listing.userId, {
                 method: 'GET',
                 credentials: 'include'
             }).then(res => res.json()).then(result => {

@@ -37,7 +37,7 @@ const Listing = () => {
             const listingId = params.id;
             setLoading(true)
             try {
-                const res = await fetch(API_URL + '/api/listing/' + listingId);
+                const res = await fetch(API_URL + '/api/listing/id/' + listingId);
 
                 const result = await res.json();
 

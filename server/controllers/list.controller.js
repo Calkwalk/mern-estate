@@ -152,9 +152,59 @@ export const getListingById = (req, res, next) => {
 };
 
 export const getListings = (req, res, next) => {
-    db.query('SELECT * FROM Lists', (err, result) => {
+    const { searchTerm, type, parking, furnished, offer, sort, order } = req.query;
+
+    let criterias = [];
+    let sqlPattern = ''
+    if (searchTerm !== undefined) {
+        sqlPattern = 'WHERE list_name LIKE ?';
+        criterias.push('%' + searchTerm + '%');
+    } else {
+        sqlPattern = 'WHERE 1 = 1';
+    }
+
+    if(type !== undefined && type !== 'all') {
+        sqlPattern = sqlPattern.concat(' And list_type = ?');
+        criterias.push(type)
+    }
+
+
+    if(parking !== undefined && parking === 'true') {
+        sqlPattern = sqlPattern.concat(' And JSON_CONTAINS(amenities, JSON_ARRAY(?))');
+        criterias.push('parking')
+    }
+
+    if(furnished !== undefined && furnished === 'true') {
+        sqlPattern = sqlPattern.concat(' And JSON_CONTAINS(amenities, JSON_ARRAY(?))');
+        criterias.push('furnished')
+    }
+
+    if(offer !== undefined && offer === 'true') {
+        sqlPattern = sqlPattern.concat(' And JSON_CONTAINS(amenities, JSON_ARRAY(?))');
+        criterias.push('offer')
+    }
+
+
+    if(sort !== undefined) {
+        sqlPattern = sqlPattern.concat(' Order By ??');
+        criterias.push(sort)
+    } else {
+        sqlPattern.concat(' Order By id');
+    }
+
+    if(order !== undefined) {
+        sqlPattern = sqlPattern.concat(' ' + order);
+    } else {
+        sqlPattern.concat(' desc');
+    }
+
+    // debug sql sentence
+    // console.log('sqlPattern', sqlPattern)
+    // console.log('criterias',criterias)
+
+    db.query('SELECT * FROM Lists ' + sqlPattern, criterias, (err, result) => {
         if (err) return next(err);
-        
+
         res.json({
             success: true,
             message: 'Listing query success',

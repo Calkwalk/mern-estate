@@ -61,7 +61,8 @@ app.use((err, req, res, next) => {
 
 // 404
 app.post('*', (req, res) => res.status(404).json({ message: 'URL Not Found(404).' }));
-app.get("*", (req, res) => res.status(404).sendFile(__dirname + "/public/404.html"))
+app.post('*', (req, res) => res.status(404).json({ message: 'URL Not Found(404).' }));
+//app.get("*", (req, res) => res.status(404).sendFile(__dirname + "/public/404.html"))
 
 
 /* MONGOOSE SETUP And Listen Server Post */

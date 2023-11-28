@@ -227,7 +227,7 @@ const CreateList = () => {
 				name='list-form'
 				autoComplete='off'
 				labelCol={{ flex: '110px' }}
-				initialValues={{ listType: 'rent', amenities: null, beds: 1, baths: 1, price: 9.9, offerPrice: 9.9 }}
+				initialValues={{ listType: 'rent', amenities: [], beds: 1, baths: 1, price: 9.9, offerPrice: 9.9 }}
 			>
 				<div className='flex flex-col sm:flex-row gap-6'>
 					<div>
